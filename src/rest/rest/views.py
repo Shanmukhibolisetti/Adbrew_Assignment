@@ -14,19 +14,27 @@ class TodoListView(APIView):
 
     def get(self, request):
         # Implement this method - return all todo items from db instance above.
-        tasks = list(collection.find())
-        for task in tasks:
-            task['_id'] = str(task['_id']) 
-        return Response(tasks, status=status.HTTP_200_OK)
+        try:
+            tasks = list(collection.find())
+            for task in tasks:
+                task['_id'] = str(task['_id']) 
+            return Response(tasks, status=status.HTTP_200_OK)
+        except Exception as e:
+            logging.error(f"Error fetching tasks: {e}")
+            return Response({"error": "Failed to fetch tasks."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     def post(self, request):
         # Implement this method - accept a todo item in a mongo collection, persist it using db instance above.
-        task = request.data.get("task", "")
-        if not task:
-            return Response({"error": "Task field is required."}, status=status.HTTP_400_BAD_REQUEST)
-        collection.insert_one({"task": task})
+        try:
+            task = request.data.get("task", "")
+            if not task:
+                return Response({"error": "Task field is required."}, status=status.HTTP_400_BAD_REQUEST)
+            collection.insert_one({"task": task})
 
-        return Response({"message": "Task added successfully."}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Task added successfully."}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logging.error(f"Error adding task: {e}")
+            return Response({"error": "Failed to add task."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def delete(self, request, todo_id):
         try:
@@ -36,6 +44,7 @@ class TodoListView(APIView):
 
             return Response({"message": "Task deleted successfully."}, status=200)
 
-        except:
-            return Response({"error": "Invalid task ID"}, status=400)
+        except Exception as e:
+            logging.error(f"Error deleting task: {e}")
+            return Response({"error": "Failed to delete task."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

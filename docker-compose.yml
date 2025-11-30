@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ./src/app
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.app
     image: adb_test-app
     container_name: app
     ports:
@@ -15,7 +15,7 @@ services:
   rest:
     build:
       context: ./src/rest
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.api
     image: adb_test-rest
     container_name: rest
     ports:

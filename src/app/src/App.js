@@ -1,15 +1,15 @@
 import './App.css';
 import { useEffect,useState } from 'react';
+import { fetchTasks, addTask, deleteTask} from './methods';
 
 
 export function App() {
   const [task, setTask] = useState("");
   const [list, setList] = useState([]);
 
-  const fetchTodos = async () => {
+  const fetchList = async () => {
     try {
-      const res = await fetch("http://localhost:8000/todos");
-      const data = await res.json();
+      const data = await fetchTasks();
       setList(data);
     } catch (err) {
       console.error("Error fetching todos: ", err);
@@ -17,36 +17,30 @@ export function App() {
   };
 
   const handleStatus = async (id) => {
+    const temp = [...list];
     setList(list.filter((item) => item._id !== id));
     try {
-      await fetch(`http://localhost:8000/todos/${id}`, {
-        method: "DELETE",
-      });
+      await deleteTask(id);
     } catch (err) {
       console.error("Error deleting task: ", err);
+      setList(temp);
     }
   }
 
   useEffect(() => {
-    fetchTodos();
+    fetchList();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!task) {
       alert("Task cannot be empty");
       return; 
     }
     try {
-      fetch("http://localhost:8000/todos/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ task }),
-      });
+      await addTask(task);
       setTask("");
-      fetchTodos();
+      fetchList();
     } catch (err) {
       console.error("Error adding todo: ", err);
     }
